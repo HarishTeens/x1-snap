@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello, Snaps!</title>
+    <link rel="icon" type="image/svg" href="./images/icon.svg" />
+  </head>
+
+  <body>
+    <h1>Hello, Snaps!</h1>
+    <br />
+
+    <button class="connect">Connect</button>
+    <button class="sendHello">Send Hello</button>
+    <button class="connectX1">Connect</button>
+    <button class="fishy">Fishy</button>
+
+    <div class="device"></div>
+  </body>
+
+  <script>
+    const snapId = `local:${window.location.href}`;
+    let cypherockX1 = null;
+
+    const connectButton = document.querySelector('button.connect');
+    const sendButton = document.querySelector('button.sendHello');
+    const connectX1Button = document.querySelector('button.connectX1');
+    const fishyButton = document.querySelector('button.fishy');
+
+    connectButton.addEventListener('click', connect);
+    sendButton.addEventListener('click', send);
+    connectX1Button.addEventListener('click', connectX1);
+    fishyButton.addEventListener('click', fishy);
+
+    // here we get permissions to interact with and install the snap
+    async function connect() {
+      await ethereum.request({
+        method: 'wallet_enable',
+        params: [
+          {
+            wallet_snap: { [snapId]: {} },
+          },
+        ],
+      });
+    }
+
+    // here we call the snap's "hello" method
+    async function send() {
+      try {
+        const response = await ethereum.request({
+          method: 'wallet_invokeSnap',
+          params: [
+            snapId,
+            {
+              method: 'hello',
+              params: [
+                {
+                  name: 'Cypherock X1',
+                  device: cypherockX1,
+                },
+              ],
+            },
+          ],
+        });
+      } catch (err) {
+        console.error(err);
+        alert('Problem happened: ' + err.message || err);
+      }
+    }
+
+    async function connectX1() {
+      navigator.usb
+        .requestDevice({ filters: [{ vendorId: 0x3503 }] })
+        .then((x1Device) => {
+          console.log(x1Device);
+          cypherockX1 = x1Device;
+          renderDevice();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+
+    async function fishy() {
+      try {
+        const response = await ethereum.request({
+          method: 'wallet_invokeSnap',
+          params: [
+            snapId,
+            {
+              method: 'fishy',
+            },
+          ],
+        });
+        console.log('node', response);
+      } catch (err) {
+        console.error(err);
+        alert('Problem happened: ' + err.message || err);
+      }
+    }
+
+    function renderDevice() {
+      if (cypherockX1) {
+        const device = document.querySelector('.device');
+        device.innerHTML = `
+          <h2>Cypherock X1</h2>
+          <p>
+            <strong>Vendor ID:</strong> ${cypherockX1.vendorId}<br />
+            <strong>Product ID:</strong> ${cypherockX1.productId}<br />
+            <strong>Serial Number:</strong> ${cypherockX1.serialNumber}<br />
+          </p>
+        `;
+      }
+    }
+  </script>
+</html>

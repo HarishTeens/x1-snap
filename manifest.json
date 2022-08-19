@@ -1,0 +1,18 @@
+{
+    "name": "Cypherock X1 Extension",
+    "version": "1.0.0",
+    "description": "wrapper for metamask x1-snap",
+    "manifest_version": 3,
+    "author": "Cypherock",
+    "action":{
+        "default_popup": "index.html",
+        "default_title": "Cypherock X1 Extension"
+    },
+    "content_scripts": [
+        {
+            "matches": ["*://*.google.com/*"],
+            "js": ["inject.js"]
+        }
+    ],
+    "host_permissions": ["<all_urls>"]
+}
